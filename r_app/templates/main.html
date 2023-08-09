@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Page</title>
+    <!-- Add Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      /* Your custom styles (if needed) */
+      body {
+        text-align: center;
+        padding: 50px;
+      }
+      h1 {
+        margin-bottom: 30px;
+      }
+      div {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to the Panel</h1>
+    <div>
+      <button id="user" class="btn btn-primary">User</button>
+    </div>
+    <div>
+      <button id="api" class="btn btn-primary">API</button>
+    </div>
+    <div>
+      <button id="logout" class="btn btn-primary">Logout</button>
+    </div>
+
+    <!-- Include Bootstrap JS and any additional JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      // Get references to the buttons
+      const user = document.getElementById("user");
+      const api = document.getElementById("api");
+      const logout = document.getElementById("logout");
+      // Add click event listeners to each button
+      user.addEventListener(
+        "click",
+        () => (window.location.href = "/api/user")
+      );
+      api.addEventListener("click", () => (window.location.href = "/api/api"));
+      // Function to redirect to users.html
+      function redirectToUsersPage() {
+        // Replace "users.html" with the actual URL or path to your users.html page
+        window.location.href = "/api/user";
+      }
+      logout.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "/api/login/";
+      });
+      const onDocumentLoad = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href = "/api/login/";
+        }
+      };
+      document.addEventListener("DOMContentLoaded", onDocumentLoad);
+    </script>
+  </body>
+</html>

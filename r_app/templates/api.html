@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>API</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .form-container {
+        display: none;
+      }
+      .delete-container {
+        display: none;
+      }
+      .viewList {
+        display: none;
+      }
+      .update-container {
+        display: none;
+      }
+      .map-container {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1 class="text-center">API</h1>
+      <div class="d-flex justify-content-center mt-3">
+        <button id="viewButton" class="btn btn-primary mx-2">View API</button>
+        <button id="createButton" class="btn btn-primary mx-2">
+          Create API
+        </button>
+        <button id="deleteButton" class="btn btn-primary mx-2">
+          Delete API
+        </button>
+        <button id="updateButton" class="btn btn-primary mx-2">
+          Update API
+        </button>
+        <button id="mapButton" class="btn btn-primary mx-2">Map API</button>
+      </div>
+      <!--Display api-->
+      <div id="view-list" class="card view-list"></div>
+      <!-- API creation form -->
+      <div class="form-container mt-4">
+        <form id="create_api">
+          <div class="form-group">
+            <label for="api_name">API Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="api_name"
+              name="api_name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="endpoints">Endpoints:</label>
+            <textarea
+              class="form-control"
+              id="endpoints"
+              name="endpoints"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea
+              class="form-control"
+              id="description"
+              name="description"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="methods">Methods:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="methods"
+              name="methods"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Create API</button>
+          <div id="responseMessage" class="mt-2"></div>
+        </form>
+      </div>
+
+      <!-- API deletion form -->
+      <div class="delete-container mt-4">
+        <form id="deleteForm">
+          <div class="form-group">
+            <label for="id">API ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="id"
+              name="id"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Delete API</button>
+          <div id="responseDeleteMessage" class="mt-2"></div>
+        </form>
+      </div>
+
+      <!-- API update form -->
+      <div class="update-container mt-4">
+        <form id="getUpdate">
+          <div class="form-group">
+            <label for="update_id">API ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_id"
+              name="update_id"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Get API Data</button>
+        </form>
+        <form id="update">
+          <!-- Add form fields for updating 'api_name', 'endpoints', 'description', and 'methods' -->
+          <div class="form-group">
+            <label for="update_api_name">API Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_api_name"
+              name="update_api_name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="update_endpoints">Endpoints:</label>
+            <textarea
+              class="form-control"
+              id="update_endpoints"
+              name="update_endpoints"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="update_description">Description:</label>
+            <textarea
+              class="form-control"
+              id="update_description"
+              name="update_description"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="update_methods">Methods:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_methods"
+              name="update_methods"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update API</button>
+          <div id="updateresponseMessage" class="mt-2"></div>
+        </form>
+      </div>
+
+      <!-- API To map api to user -->
+      <div class="map-container mt-4">
+        <form id="mapForm">
+          <div class="form-group">
+            <label for="api_id">API ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="api_id"
+              name="map_api_id"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="user_id">User ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="user_id"
+              name="map_user_id"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Map API to User</button>
+          <div id="mapresponseMessage" class="mt-2"></div>
+        </form>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      let token = localStorage.getItem("token");
+      console.log(token);
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("createButton");
+        const formContainer = document.querySelector(".form-container");
+        const deleteToggleButtton = document.getElementById("deleteButton");
+        const deleteContainer = document.querySelector(".delete-container");
+        const viewButton = document.getElementById("viewButton");
+        const viewList = document.querySelector(".view-list");
+        const updateContainer = document.querySelector(".update-container");
+        const updateButton = document.getElementById("updateButton");
+        const mapButton = document.getElementById("mapButton");
+        const mapContainer = document.querySelector(".map-container");
+        toggleButton.addEventListener("click", function () {
+          formContainer.style.display =
+            formContainer.style.display === "none" ? "block" : "none";
+        });
+        deleteToggleButtton.addEventListener("click", function () {
+          deleteContainer.style.display =
+            deleteContainer.style.display === "none" ? "block" : "none";
+        });
+        viewButton.addEventListener("click", function () {
+          viewList.style.display =
+            viewList.style.display === "none" ? "block" : "none";
+        });
+        updateButton.addEventListener("click", function () {
+          updateContainer.style.display =
+            updateContainer.style.display === "none" ? "block" : "none";
+        });
+        mapButton.addEventListener("click", function () {
+          mapContainer.style.display =
+            mapContainer.style.display === "none" ? "block" : "none";
+        });
+        //Function to fetch api
+        $(document).ready(function () {
+          // Define the API endpoint URL
+          const apiEndpoint = "/api/get_api/";
+
+          // Function to fetch and display users
+          let usersDisplayed = false;
+          function viewAPI() {
+            $.ajax({
+              type: "GET",
+              url: apiEndpoint,
+              headers: {
+                Authorization: token,
+              },
+              success: function (data) {
+                // On success, update the usersList div with user data
+                displayAPIs(data);
+                usersDisplayed = true;
+              },
+              error: function (xhr, status, error) {
+                // On error, display an error message
+                const errorMessage =
+                  xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : "Error fetching users";
+                $("#usersList").html(errorMessage);
+              },
+            });
+          }
+          $("#viewButton").click(function () {
+            viewAPI();
+          });
+        });
+        //Function to display user
+        function displayAPIs(apis) {
+          let apisHTML = "";
+          apisHTML += '<div class="card-header">API List</div>';
+          apisHTML += '<ul class="list-group list-group-flush">';
+          for (const api of apis) {
+            apisHTML += '<li class="list-group-item">';
+            apisHTML += "<strong>API ID:</strong> " + api.id + "<br>";
+            apisHTML += "<strong>API Name:</strong> " + api.api_name + "<br>";
+            apisHTML += "<strong>Endpoints:</strong> " + api.endpoints + "<br>";
+            apisHTML +=
+              "<strong>Description:</strong> " + api.description + "<br>";
+            apisHTML += "<strong>Methods:</strong> " + api.methods + "<br>";
+            if (api.users_mapped) {
+              api.users_mapped.map(function (user) {
+                let role = "";
+                if (user[1] === 1) {
+                  user[1] = "ADMIN";
+                } else if (user[1] === 2) {
+                  user[1] = "USER";
+                } else if (user[1] === 3) {
+                  user[1] = "VIEWER";
+                }
+                apisHTML +=
+                  "<strong>Mapped Users are:</strong> {username:" +
+                  user[0] +
+                  ",role:" +
+                  user[1] +
+                  "}<br>";
+              });
+            } else {
+              apisHTML +=
+                "<strong>Mapped Users are:</strong> " + "No One" + "<br>";
+            }
+            apisHTML += "</li>";
+          }
+          document.getElementById("view-list").innerHTML = apisHTML;
+        }
+
+        //Function to create api
+        const createApi = document.getElementById("create_api");
+        createApi.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(createApi);
+          const api_name = formData.get("api_name");
+          const endpoints = formData.get("endpoints");
+          const description = formData.get("description");
+          const methods = formData.get("methods");
+
+          const headers = {
+            Authorization: token,
+            "Content-Type": "application/json", // Set the Content-Type header to specify JSON data
+          };
+
+          // Convert the role values to integers if required (not needed in this case)
+
+          const postData = JSON.stringify({
+            api_name: api_name,
+            endpoints: endpoints,
+            description: description,
+            methods: methods,
+          });
+
+          $.ajax({
+            type: "POST",
+            url: "/api/create_api/", // Replace with your actual post URL
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById("responseMessage");
+              responseDiv.innerHTML =
+                "API created successfully: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById("responseMessage");
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+
+        //Function to delete api
+        const deleteForm = document.getElementById("deleteForm");
+        deleteForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(deleteForm);
+          const id = formData.get("id");
+          let ids = parseInt(id);
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            id: ids,
+          });
+          $.ajax({
+            type: "DELETE",
+            url: "/api/delete_api/",
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById(
+                "responseDeleteMessage"
+              );
+              responseDiv.innerHTML =
+                "DELETE successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById(
+                "responseDeleteMessage"
+              );
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+
+        //Function to Get API BY ID
+        const getUpdate = document.getElementById("getUpdate");
+        getUpdate.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(getUpdate);
+          const id = formData.get("update_id");
+          console.log(id);
+          let ids = parseInt(id);
+          const headers = {
+            Authorization: token,
+            "Content-Type": "application/json", // Set the Content-Type header to specify JSON data
+          };
+
+          const postData = JSON.stringify({
+            id: ids,
+          });
+
+          $.ajax({
+            type: "POST",
+            url: "/api/get_apiBy/", // Replace with your actual API endpoint for retrieving API data by ID
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              console.log("Get API Success:", response);
+              // Extract 'api_name', 'endpoints', 'description', and 'methods' from the response data
+              const { api_name, endpoints, description, methods } = response;
+
+              // Update the form fields with the retrieved data
+              document.getElementById("update_api_name").value = api_name;
+              document.getElementById("update_endpoints").value = endpoints;
+              document.getElementById("update_description").value = description;
+              document.getElementById("update_methods").value = methods;
+            },
+            error: function (xhr, status, error) {
+              console.log("Get API Error:", error);
+            },
+          });
+        });
+        //Function to Update API
+        const update = document.getElementById("update");
+        update.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(getUpdate);
+          const formUpdate = new FormData(update);
+          const id = formData.get("update_id");
+          const api_name = formUpdate.get("update_api_name");
+          const endpoints = formUpdate.get("update_endpoints");
+          const description = formUpdate.get("update_description");
+          const methods = formUpdate.get("update_methods");
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            id: id,
+            api_name: api_name,
+            endpoints: endpoints,
+            description: description,
+            methods: methods,
+          });
+          $.ajax({
+            type: "PUT",
+            url: "/api/update_api/",
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById(
+                "updateresponseMessage"
+              );
+              responseDiv.innerHTML =
+                "Post successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById(
+                "updateresponseMessage"
+              );
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+        //Function to Map API to USER
+        const map = document.getElementById("mapForm");
+        map.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(map);
+          const api_id = formData.get("map_api_id");
+          const user_id = formData.get("map_user_id");
+          const user_ids_array = user_id
+            .split(",")
+            .map((id) => parseInt(id.trim()));
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            api_id: api_id,
+            user_id: user_ids_array,
+          });
+          $.ajax({
+            type: "POST",
+            url: "/api/mapApi/",
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById("mapresponseMessage");
+              responseDiv.innerHTML =
+                "Post successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById("mapresponseMessage");
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+      });
+      const onDocumentLoad = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href = "/api/login/";
+        }
+      };
+
+      document.addEventListener("DOMContentLoaded", onDocumentLoad);
+    </script>
+  </body>
+</html>

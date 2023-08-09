@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Users</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .form-container {
+        display: none;
+      }
+      .delete-container {
+        display: none;
+      }
+      .viewList {
+        display: none;
+      }
+      .update-container {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1 class="text-center">Users</h1>
+      <div class="d-flex justify-content-center mt-3">
+        <button id="viewButton" class="btn btn-primary mx-2">View Users</button>
+        <button id="createButton" class="btn btn-primary mx-2">
+          Create Users
+        </button>
+        <button id="deleteButton" class="btn btn-primary mx-2">
+          Delete Users
+        </button>
+        <button id="updateButton" class="btn btn-primary --pink mx-2">
+          Update Users
+        </button>
+      </div>
+      <div id="view-list" class="card view-list"></div>
+      <div class="form-container mt-4">
+        <form id="userForm">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select class="form-control" id="role" name="role">
+              <option value="ADMIN">Admin</option>
+              <option value="USER">User</option>
+              <option value="VIEWER">Viewer</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <div id="responseMessage" class="mt-2"></div>
+        </form>
+      </div>
+      <div class="delete-container mt-4">
+        <form id="deleteForm">
+          <div class="form-group">
+            <label for="id">ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="id"
+              name="id"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <div id="responseDeleteMessage" class="mt-2"></div>
+        </form>
+      </div>
+      <div class="update-container mt-4">
+        <form id="getUpdate">
+          <div class="form-group">
+            <label for="update_id">ID:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_id"
+              name="update_id"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <form id="update">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_username"
+              name="update_username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="update_password"
+              name="update_password"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select class="form-control" id="update_role" name="update_role">
+              <option value="ADMIN">Admin</option>
+              <option value="USER">User</option>
+              <option value="VIEWER">Viewer</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <div id="updateresponseMessage" class="mt-2"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Include jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap JS and any additional JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      // Fetching token from the localstorage
+      let token = localStorage.getItem("token");
+      console.log(token);
+      // For display user
+      $(document).ready(function () {
+        // Define the API endpoint URL
+        const apiEndpoint = "/api/get_user/";
+
+        // Function to fetch and display users
+        let usersDisplayed = false;
+        function viewUsers() {
+          $.ajax({
+            type: "GET",
+            url: apiEndpoint,
+            headers: {
+              Authorization: token,
+            },
+            success: function (data) {
+              // On success, update the usersList div with user data
+              displayUsers(data);
+              usersDisplayed = true;
+            },
+            error: function (xhr, status, error) {
+              // On error, display an error message
+              const errorMessage =
+                xhr.responseJSON && xhr.responseJSON.message
+                  ? xhr.responseJSON.message
+                  : "Error fetching users";
+              $("#usersList").html(errorMessage);
+            },
+          });
+        }
+        $("#viewButton").click(function () {
+          viewUsers();
+        });
+
+        // Function to display user data
+        function displayUsers(users) {
+          let usersHTML = "";
+          usersHTML += '<div class="card-header">User List</div>';
+          usersHTML += '<ul class="list-group list-group-flush">';
+          users.forEach(function (user) {
+            let role = "";
+            if (user.role === 1) {
+              role = "ADMIN";
+            } else if (user.role === 2) {
+              role = "USER";
+            } else if (user.role === 3) {
+              role = "VIEWER";
+            }
+
+            usersHTML += '<li class="list-group-item">';
+            usersHTML += "<strong>User ID:</strong> " + user.id + "<br>";
+            usersHTML += "<strong>Username:</strong> " + user.username + "<br>";
+            usersHTML += "<strong>Password:</strong> " + user.password + "<br>";
+            usersHTML += "<strong>Role:</strong> " + role;
+            usersHTML += "</li>";
+          });
+
+          usersHTML += "</ul>";
+          usersHTML += "</div>";
+          document.getElementById("view-list").innerHTML = usersHTML;
+        }
+
+        // Attach the viewUsers function to the "View Users" button click event
+        $("#viewButton").click(function () {
+          viewUsers();
+        });
+      });
+      //For togglebutton and to handle button functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("createButton");
+        const formContainer = document.querySelector(".form-container");
+        const deleteToggleButtton = document.getElementById("deleteButton");
+        const deleteContainer = document.querySelector(".delete-container");
+        const viewButton = document.getElementById("viewButton");
+        const viewList = document.querySelector(".view-list");
+        const updateContainer = document.querySelector(".update-container");
+        const updateButton = document.getElementById("updateButton");
+        toggleButton.addEventListener("click", function () {
+          formContainer.style.display =
+            formContainer.style.display === "none" ? "block" : "none";
+        });
+        deleteToggleButtton.addEventListener("click", function () {
+          deleteContainer.style.display =
+            deleteContainer.style.display === "none" ? "block" : "none";
+        });
+        viewButton.addEventListener("click", function () {
+          viewList.style.display =
+            viewList.style.display === "none" ? "block" : "none";
+        });
+        updateButton.addEventListener("click", function () {
+          updateContainer.style.display =
+            updateContainer.style.display === "none" ? "block" : "none";
+        });
+        //Create the user
+        const userForm = document.getElementById("userForm");
+        userForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(userForm);
+          const username = formData.get("username");
+          const password = formData.get("password");
+          let role = formData.get("role");
+          if (role === "ADMIN") {
+            role = 1;
+          } else if (role === "USER") {
+            role = 2;
+          } else if (role === "VIEWER") {
+            role = 3;
+          }
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            username: username,
+            password: password,
+            role: role,
+          });
+          $.ajax({
+            type: "POST",
+            url: "/api/create_user/", // Replace with your actual post URL
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById("responseMessage");
+              responseDiv.innerHTML =
+                "Post successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById("responseMessage");
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+        // delete user
+        const deleteForm = document.getElementById("deleteForm");
+        deleteForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(deleteForm);
+          const id = formData.get("id");
+          let ids = parseInt(id);
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            id: ids,
+          });
+          $.ajax({
+            type: "DELETE",
+            url: "/api/delete_user/", // Replace with your actual post URL
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById(
+                "responseDeleteMessage"
+              );
+              responseDiv.innerHTML =
+                "DELETE successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById(
+                "responseDeleteMessage"
+              );
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+        //Get user by id
+        const getUpdate = document.getElementById("getUpdate");
+        getUpdate.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(getUpdate);
+          const id = formData.get("update_id");
+          console.log(id);
+          let ids = parseInt(id);
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            id: ids,
+          });
+          $.ajax({
+            type: "POST",
+            url: "/api/get_userBy/",
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              console.log("Get User Success:", response);
+              // Extract username, password, and role from the response data
+              const { username, password, role } = response;
+              // Update the form fields with the retrieved data
+              document.getElementById("update_username").value = username;
+              document.getElementById("update_password").value = password;
+              // Convert numeric role (1, 2, 3) to the corresponding string value ("ADMIN", "USER", "VIEWER")
+              let roleString = "";
+              switch (role) {
+                case 1:
+                  roleString = "ADMIN";
+                  break;
+                case 2:
+                  roleString = "USER";
+                  break;
+                case 3:
+                  roleString = "VIEWER";
+                  break;
+                default:
+                  roleString = "";
+              }
+              document.getElementById("update_role").value = roleString;
+            },
+            error: function (xhr, status, error) {
+              console.log("Get User Error:", error);
+            },
+          });
+        });
+        //Update the user
+        const update = document.getElementById("update");
+        update.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(getUpdate);
+          const formUpdate = new FormData(update);
+          const id = formData.get("update_id");
+          const username = formUpdate.get("update_username");
+          const password = formUpdate.get("update_password");
+          let role = formUpdate.get("update_role");
+          if (role === "ADMIN") {
+            role = 1;
+          } else if (role === "USER") {
+            role = 2;
+          } else if (role === "VIEWER") {
+            role = 3;
+          }
+          const headers = {
+            Authorization: token,
+          };
+          const postData = JSON.stringify({
+            id: id,
+            username: username,
+            password: password,
+            role: role,
+          });
+          $.ajax({
+            type: "PUT",
+            url: "/api/update_user/", // Replace with your actual post URL
+            headers: headers,
+            data: postData,
+            success: function (response) {
+              const responseDiv = document.getElementById(
+                "updateresponseMessage"
+              );
+              responseDiv.innerHTML =
+                "Post successful: " + JSON.stringify(response);
+            },
+            error: function (xhr, status, error) {
+              const responseDiv = document.getElementById(
+                "updateresponseMessage"
+              );
+              responseDiv.innerHTML = "Error: " + JSON.stringify(error);
+            },
+          });
+        });
+      });
+      const onDocumentLoad = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href = "/api/login/";
+        }
+      };
+
+      document.addEventListener("DOMContentLoaded", onDocumentLoad);
+    </script>
+  </body>
+</html>
